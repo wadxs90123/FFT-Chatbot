@@ -8,8 +8,7 @@ from spider import Store
 from linebot import LineBotApi, WebhookParser
 from linebot.models import MessageAction,MessageEvent, TextMessage, TextSendMessage, VideoSendMessage
 from linebot.models import PostbackAction,URIAction, CarouselColumn,ImageCarouselColumn, URITemplateAction, MessageTemplateAction
-from utils import send_text_message
-from utils import send_text_message_AI
+from utils import send_text_message 
 from utils import send_carousel_message
 from utils import send_button_message 
 from utils import send_image_message
@@ -149,10 +148,14 @@ class TocMachine(GraphMachine):
         print("foodList : "+str(len(foodList)))
         for i in range(len(foodList)):
             t = foodList[i]
+            des = f'消費: {t.priceInfo} 營業資訊: {t.openInfo}'
+            if len(des) > 60 :
+                des = des[0:56]+'...略'
+            
             c = CarouselColumn(
             thumbnail_image_url= f'{t.img_src}',
             title = f'{t.name}({t.starInfo}★)',
-            text=f'消費: {t.priceInfo} 營業資訊: {t.openInfo}',
+            text=f'{des}',
             actions=[
                 URIAction(
                     label='查看更多',
