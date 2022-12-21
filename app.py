@@ -13,7 +13,6 @@ from fsm import inputArea, inputType, inputPrice
 from spider import ScratchPages
 from spider import Store
 from utils import send_text_message
-from utils import send_text_message_AI
 from utils import send_carousel_message
 from utils import send_button_message 
 from utils import send_image_message
@@ -23,27 +22,6 @@ load_dotenv()
 
 hash_map = dict()
 
-# machine = TocMachine(
-    # states=[
-    #     "user", 
-    #     "inputArea",
-    #     "inputType",
-    #     "inputPrice",
-    #     "startSearch"
-    #     ],
-    # transitions=[
-    #         {"trigger": "advance", "source": "user", "dest": "inputArea",      "conditions": "is_going_to_inputArea"},
-    #         {"trigger": "advance", "source": "inputArea", "dest": "inputType", "conditions": "is_going_to_inputType"},
-    #         {"trigger": "advance", "source": "inputType", "dest": "inputPrice", "conditions": "is_going_to_inputPrice"},
-    #         {"trigger": "advance", "source": "inputPrice", "dest": "startSearch", "conditions": "is_going_to_startSearch"},
-    #         {"trigger": "advance", "source": "startSearch", "dest": "startSearch", "conditions": "want_more"},
-    #         # {"trigger": "advance", "source": "startSearch", "dest": "user", "condition":"is_going_to_user_from_startSearch"},
-    #         {"trigger": "go_back", "source": ["inputPrice","inputType","inputArea","startSearch"], "dest": "user","conditions":"is_back_to_user"},
-    # ],
-    # initial="user",
-    # auto_transitions=False,
-    # show_conditions=True,
-# )
 
 app = Flask(__name__, static_url_path="")
 
@@ -70,12 +48,17 @@ def webhook_handler():
     
     data = json.loads(body)
 
+    if data['events'] ==[]:
+        print("Webhook Test!")
+        return "OK"
     userId = data['events'][0]['source']['userId']
     print("userid : "+userId)
     machine = hash_map.setdefault(userId,TocMachine(
             states=[
                     "user", 
                     "inputArea",
+                    "inputArea2",
+                    "inputArea3",
                     "inputType",
                     "inputPrice",
                     "startSearch"
@@ -83,11 +66,21 @@ def webhook_handler():
             transitions=[
                     {"trigger": "advance", "source": "user", "dest": "inputArea",      "conditions": "is_going_to_inputArea"},
                     {"trigger": "advance", "source": "inputArea", "dest": "inputType", "conditions": "is_going_to_inputType"},
+                    
+                    {"trigger": "advance", "source": "inputArea", "dest": "inputArea2", "conditions": "is_going_to_inputArea2"},
+                    {"trigger": "advance", "source": "inputArea2", "dest": "inputArea", "conditions": "inputArea2_going_to_inputArea"},
+                    {"trigger": "advance", "source": "inputArea2", "dest": "inputArea3", "conditions": "is_going_to_inputArea3"},
+                    {"trigger": "advance", "source": "inputArea3", "dest": "inputArea2", "conditions": "inputArea3_going_to_inputArea2"},
+                    
+                    {"trigger": "advance", "source": "inputType", "dest": "inputArea", "conditions": "go_back_to_area"},
+                    {"trigger": "advance", "source": "inputPrice", "dest": "inputType", "conditions": "go_back_to_type"},
+
                     {"trigger": "advance", "source": "inputType", "dest": "inputPrice", "conditions": "is_going_to_inputPrice"},
                     {"trigger": "advance", "source": "inputPrice", "dest": "startSearch", "conditions": "is_going_to_startSearch"},
                     {"trigger": "advance", "source": "startSearch", "dest": "startSearch", "conditions": "want_more"},
+                    {"trigger": "advance", "source": "startSearch", "dest": "inputPrice", "conditions": "go_back_to_price"},
                     # {"trigger": "advance", "source": "startSearch", "dest": "user", "condition":"is_going_to_user_from_startSearch"},
-                    {"trigger": "go_back", "source": ["inputPrice","inputType","inputArea","startSearch"], "dest": "user","conditions":"is_back_to_user"},
+                    {"trigger": "go_back", "source": ["inputPrice","inputType","inputArea","inputArea2","inputArea3","startSearch"], "dest": "user","conditions":"is_back_to_user"},
             ],
             initial="user",
             auto_transitions=False,
@@ -123,11 +116,14 @@ def webhook_handler():
             if machine.state != 'user' and event.message.text=='返回主選單':
                 machine.go_back(event)
             elif machine.state == 'user':
-                send_text_message(reply_token, "請輸入\"start\"來開始查找食物")
+                # send_text_message(reply_token, "請輸入\"start\"來開始查找食物")
+                machine.on_enter_user(event)
             elif machine.state == 'inputArea':
-                send_text_message(reply_token, "抱歉, 我找不到這個區, 請您確認好再跟我說一次(ex: 東區)")
-            elif machine.state == 'inputType' or machine.state == 'inputPrice':
-                send_text_message(reply_token, "抱歉, 請輸入菜單上有的選項")
+                machine.on_enter_inputArea(event)
+            elif machine.state == 'inputType':
+                machine.on_enter_inputType(event)
+            elif machine.state == 'inputPrice':
+                machine.on_enter_inputPrice(event)
                 
     return "OK"
  

@@ -37,10 +37,128 @@ class TocMachine(GraphMachine):
     def is_going_to_inputArea(self, event):
         reply_token = event.reply_token
         text = event.message.text
-        return text.lower().strip() == 'start' 
+        return text == '我想找吃的' 
+    def is_going_to_inputArea2(self, event):
+        reply_token = event.reply_token
+        text = event.message.text
+        return text == '其他區域' 
+    def on_enter_inputArea2(self, event):
+        reply_token = event.reply_token
+        title = '請點選您要查找的區名~'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            title=title,
+            text='其他功能',
+            actions=[
+                PostbackAction(
+                    label=f'目前:區域(2/3)',
+                    data='action=none'    
+                ),MessageAction(
+                    label=f'返回區域(1/3)',
+                    text =f'返回區域(1/3)'
+                ),MessageAction(
+                    label=f'其他區域',
+                    text =f'其他區域'           
+                )
+            ]
+        ))
+        for i in range(4):
+            action = []
+            for j in range(3):
+                action.append(MessageAction(
+                    label=f'{inputAreaDict[12+i*3+j]}',
+                    text =f'{inputAreaDict[12+i*3+j]}'   
+                ))    
+            col.append(CarouselColumn(
+                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                title=title,
+                text='請點選任一區',
+                actions=action
+            ))
+        send_carousel_message(reply_token, col)
+    def inputArea2_going_to_inputArea(self, event):
+        reply_token = event.reply_token
+        text = event.message.text
+        return text == '返回區域(1/3)'
+    def inputArea3_going_to_inputArea2(self, event):
+        reply_token = event.reply_token
+        text = event.message.text
+        return text == '返回區域(2/3)'
+    def is_going_to_inputArea3(self, event):
+        reply_token = event.reply_token
+        text = event.message.text
+        return text == '其他區域' 
+    def on_enter_inputArea3(self, event):
+        reply_token = event.reply_token
+        title = '請點選您要查找的區名~'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            title=title,
+            text='其他功能',
+            actions=[
+                PostbackAction(
+                    label=f'目前:區域(3/3)',
+                    data='action=none'    
+                ),MessageAction(
+                    label=f'返回區域(2/3)',
+                    text =f'返回區域(2/3)'
+                ),MessageAction(
+                    label=f'{inputAreaDict[24]}',
+                    text =f'{inputAreaDict[24]}'           
+                )
+            ]
+        ))
+        for i in range(4):
+            action = []
+            for j in range(3):
+                action.append(MessageAction(
+                    label=f'{inputAreaDict[25+i*3+j]}',
+                    text =f'{inputAreaDict[25+i*3+j]}'   
+                ))    
+            col.append(CarouselColumn(
+                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                title=title,
+                text='請點選任一區',
+                actions=action
+            ))
+        send_carousel_message(reply_token, col)
     def on_enter_inputArea(self, event):
         reply_token = event.reply_token
-        send_text_message(reply_token, '請告訴我區名, 例如: 東區')
+        title = '請點選您要查找的區名~'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            title=title,
+            text='其他功能',
+            actions=[
+                PostbackAction(
+                    label=f'目前:區域(1/3)',
+                    data='action=none'    
+                ),MessageAction(
+                    label=f'其他區域',
+                    text =f'其他區域'
+                ),MessageAction(
+                    label=f'返回主選單',
+                    text =f'返回主選單'           
+                )
+            ]
+        ))
+        for i in range(4):
+            action = []
+            for j in range(3):
+                action.append(MessageAction(
+                    label=f'{inputAreaDict[i*3+j]}',
+                    text =f'{inputAreaDict[i*3+j]}'   
+                ))    
+            col.append(CarouselColumn(
+                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                title=title,
+                text='請點選任一區',
+                actions=action
+            ))
+        send_carousel_message(reply_token, col)
     def is_going_to_inputType(self, event):
         global inputArea
         text = event.message.text
@@ -49,31 +167,68 @@ class TocMachine(GraphMachine):
             inputArea = text   
             return True
         return False
-    def on_enter_inputType(self, event):
-        print('enter inputtype')
+    def go_back_to_price(self, event):
         global inputArea
+        text = event.message.text
+        reply_token = event.reply_token
+                
+        return text == '返回預算選單'
+    def go_back_to_area(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+                
+        return text == '返回地區選單'
+    def go_back_to_type(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+                
+        return text == '返回時段選單'    
+    def on_enter_inputType(self, event):
+        reply_token = event.reply_token
+        print('enter inputtype')
+        global inputType
         title = f'您選擇的區域是 \"{inputArea}\", 您希望用餐的時段是何時呢?'
-        text = '下方點選任一時段'
-        btn = [
-            MessageTemplateAction(
-                label = '早餐',
-                text ='早餐'
-            ),
-            MessageTemplateAction(
-                label = '午餐',
-                text = '午餐'
-            ),
-            MessageTemplateAction(
-                label = '晚餐',
-                text = '晚餐'
-            ),
-            MessageTemplateAction(
-                label = '宵夜',
-                text = '宵夜'
-            ),
-        ]
-        url = 'https://img.88icon.com/download/jpg/20200727/c4c0f97e4eeb527d1708adb8bd8ee671_512_512.jpg!88con'
-        send_button_message(event.reply_token, title, text, btn, url)
+        text = '請選擇任一時段'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            title=title,
+            text='請選擇任一時段',
+            actions=[
+                MessageAction(
+                    label = '早餐',
+                    text ='早餐'
+                ),
+                MessageAction(
+                    label = '午餐',
+                    text = '午餐'
+                ),
+                MessageAction(
+                    label = '晚餐',
+                    text = '晚餐'
+                )
+            ]
+        ))
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            title=title,
+            text='請選擇任一時段',
+            actions=[
+                MessageAction(
+                    label = '宵夜',
+                    text = '宵夜'
+                ),MessageAction(
+                    label=f'返回地區選單',
+                    text =f'返回地區選單'
+                ),MessageAction(
+                    label=f'返回主選單',
+                    text =f'返回主選單'           
+                )
+            ]
+        ))
+
+        send_carousel_message(reply_token, col)
+ 
     def is_going_to_inputPrice(self, event):
         global inputType
         text = event.message.text
@@ -83,28 +238,52 @@ class TocMachine(GraphMachine):
             return True
         return False
     def on_enter_inputPrice(self, event):
+        reply_token = event.reply_token
+        print('enter inputtype')
+        global inputPrice
         title = f'您選擇的區域是 \"{inputArea}\", 用餐的時段是\"{inputType}\",那預算方面如何呢?'
-        text = '下方選擇您的預算'
-        btn = [
-            MessageTemplateAction(
-                label = 'NT$150以內',
-                text ='NT$150以內'
-            ),
-            MessageTemplateAction(
-                label = 'NT$150~NT$600',
-                text = 'NT$150~NT$600'
-            ),
-            MessageTemplateAction(
-                label = 'NT$600~NT$1200',
-                text = 'NT$600~NT$1200'
-            ),
-            MessageTemplateAction(
-                label = '都可以',
-                text = '都可以'
-            )
-        ]
-        url = 'https://img.88icon.com/download/jpg/20200727/c4c0f97e4eeb527d1708adb8bd8ee671_512_512.jpg!88con'
-        send_button_message(event.reply_token, title, text, btn, url)
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            title=title,
+            text='下方選擇您的預算',
+            actions=[
+                MessageAction(
+                    label = 'NT$150以內',
+                    text ='NT$150以內'
+                ),
+                MessageAction(
+                    label = 'NT$150~NT$600',
+                    text = 'NT$150~NT$600'
+                ),
+                MessageAction(
+                    label = 'NT$600~NT$1200',
+                    text = 'NT$600~NT$1200'
+                )
+            ]
+        ))
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            title=title,
+            text='下方選擇您的預算',
+            actions=[
+                MessageAction(
+                    label = '都可以',
+                    text = '都可以'
+                ),
+                MessageAction(
+                    label = '返回時段選單',
+                    text ='返回時段選單'
+                ),
+                MessageAction(
+                    label = '返回主選單',
+                    text = '返回主選單'
+                )
+            ]
+        ))
+
+        send_carousel_message(reply_token, col)
+        
     def is_going_to_startSearch(self, event):
         global inputPrice
         text = event.message.text
@@ -127,7 +306,17 @@ class TocMachine(GraphMachine):
         reply_token = event.reply_token
         print("onenter_startSearch " + text)
         foodList = ScratchPages(inputArea, inputType, inputPrice, 4)
-        title = f'根據您的需求為您提供{len(foodList)}間餐廳' if len(foodList) > 0 else f'很抱歉,我找不到資料'
+        textPrice = "無資料"
+        if inputPrice == '1':
+            textPrice = 'NT$150以內'
+        elif inputPrice == '2':
+            textPrice = 'NT$150~NT$600'
+        elif inputPrice == '3':
+            textPrice = 'NT$600~NT$1200'
+        elif inputPrice == '0':
+            textPrice = '都可以'
+
+        title = f'根據您的"{inputArea}, {inputType}, {textPrice}"需求為您提供{len(foodList)}間餐廳' if len(foodList) > 0 else f'很抱歉,我找不到資料'
         col = []
         c = CarouselColumn(
             thumbnail_image_url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiEVEBZnM-1NBig3_7tuHlH9KZVn38FUoN8Nazo_ty1y4BzaqIICnU7wGr4sEFMoLZB8A&usqp=CAU',
@@ -137,6 +326,10 @@ class TocMachine(GraphMachine):
                 MessageAction(
                     label='點我要其他推薦',
                     text='再給我其他的'
+                ),
+                MessageAction(
+                    label='回上一頁',
+                    text='返回預算選單'
                 ),
                 MessageAction(
                     label='返回主選單',
@@ -164,6 +357,9 @@ class TocMachine(GraphMachine):
                 PostbackAction(
                     label=f'{t.locInfo}',
                     data='action=none'
+                ),PostbackAction(
+                    label=f'★☆★☆★☆★☆★☆★☆★',
+                    data='action=none'
                 )
             ]
             )
@@ -182,7 +378,27 @@ class TocMachine(GraphMachine):
         inputArea = ""
         inputType = ""
         inputPrice = ""
-        send_text_message(reply_token, "請輸入\"start\"來開始查找食物")
+        reply_token = event.reply_token
+        title = '我是主選單~'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url='https://www.twtainan.net/Content/images/page/page-img-LocalSnacks-tablet-01.jpg',
+            title=title,
+            text='請點選功能',
+            actions=[
+                MessageAction(
+                    label=f'我想找吃的',
+                    text =f'我想找吃的' 
+                ),MessageAction(
+                    label=f'敬請期待',
+                    text =f'敬請期待'
+                ),MessageAction(
+                    label=f'敬請期待',
+                    text =f'敬請期待'
+                )
+            ]
+        ))
+        send_carousel_message(reply_token, col)
     # def on_exit_state1(self):
     #     print("Leaving state1")
 

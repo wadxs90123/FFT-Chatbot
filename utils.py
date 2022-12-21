@@ -1,12 +1,10 @@
 import os
-import openai
 
 from linebot import LineBotApi, WebhookParser
 from linebot.models import VideoSendMessage,MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ImageCarouselColumn,CarouselTemplate, ImageCarouselTemplate, URITemplateAction, ButtonsTemplate, MessageTemplateAction, ImageSendMessage
 from linebot.models import ImageCarouselColumn, URITemplateAction, MessageTemplateAction
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def send_text_message(reply_token, text):
@@ -19,18 +17,6 @@ def send_text_multiple_message(reply_token, textList):
     line_bot_api.reply_message(reply_token, textList)
     return "OK"
 
-def send_text_message_AI(reply_token, text):
-    response = openai.Completion.create(
-        model="text-davinci-003",
-        prompt=text,
-        temperature=0,
-        max_tokens =100
-    )
-    
-    line_bot_api = LineBotApi(channel_access_token)
-    line_bot_api.reply_message(reply_token,TextSendMessage(text=response.choices[0].text.strip()))
-
-    return "OK"
 def send_video_message(reply_token, videoUrl, preUrl):
     line_bot_api = LineBotApi(channel_access_token)
     message = VideoSendMessage(
