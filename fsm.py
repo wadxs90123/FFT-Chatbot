@@ -16,6 +16,8 @@ from utils import send_video_message
 from utils import send_text_multiple_message
 from bs4 import BeautifulSoup
 
+import os
+main_url = os.getenv("MAIN_WEB_URL",None)
 
 # searchWeb = 'list?priceLevel=2'
 # mainWeb = 'https://ifoodie.tw/explore/%E5%8F%B0%E5%8D%97%E5%B8%82/%E5%AE%89%E5%8D%97%E5%8D%80/list?priceLevel=2'
@@ -47,7 +49,7 @@ class TocMachine(GraphMachine):
         title = '請點選您要查找的區名~'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            thumbnail_image_url=f'{main_url}/img/1.png',
             title=title,
             text='其他功能',
             actions=[
@@ -71,7 +73,7 @@ class TocMachine(GraphMachine):
                     text =f'{inputAreaDict[12+i*3+j]}'   
                 ))    
             col.append(CarouselColumn(
-                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                thumbnail_image_url=f'{main_url}/img/1.png',
                 title=title,
                 text='請點選任一區',
                 actions=action
@@ -94,7 +96,7 @@ class TocMachine(GraphMachine):
         title = '請點選您要查找的區名~'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            thumbnail_image_url=f'{main_url}/img/1.png',
             title=title,
             text='其他功能',
             actions=[
@@ -118,7 +120,7 @@ class TocMachine(GraphMachine):
                     text =f'{inputAreaDict[25+i*3+j]}'   
                 ))    
             col.append(CarouselColumn(
-                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                thumbnail_image_url=f'{main_url}/img/1.png',
                 title=title,
                 text='請點選任一區',
                 actions=action
@@ -129,7 +131,7 @@ class TocMachine(GraphMachine):
         title = '請點選您要查找的區名~'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+            thumbnail_image_url=f'{main_url}/img/1.png',
             title=title,
             text='其他功能',
             actions=[
@@ -153,7 +155,7 @@ class TocMachine(GraphMachine):
                     text =f'{inputAreaDict[i*3+j]}'   
                 ))    
             col.append(CarouselColumn(
-                thumbnail_image_url='https://media.zenfs.com/en-us/upmedia.mg.tw/a538598f6f888d991371711111926582',
+                thumbnail_image_url=f'{main_url}/img/1.png',
                 title=title,
                 text='請點選任一區',
                 actions=action
@@ -191,7 +193,7 @@ class TocMachine(GraphMachine):
         text = '請選擇任一時段'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            thumbnail_image_url=f'{main_url}/img/2.png',
             title=title,
             text='請選擇任一時段',
             actions=[
@@ -210,7 +212,7 @@ class TocMachine(GraphMachine):
             ]
         ))
         col.append(CarouselColumn(
-            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            thumbnail_image_url=f'{main_url}/img/2.png',
             title=title,
             text='請選擇任一時段',
             actions=[
@@ -244,7 +246,7 @@ class TocMachine(GraphMachine):
         title = f'您選擇的區域是 \"{inputArea}\", 用餐的時段是\"{inputType}\",那預算方面如何呢?'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            thumbnail_image_url=f'{main_url}/img/2.png',
             title=title,
             text='下方選擇您的預算',
             actions=[
@@ -263,7 +265,7 @@ class TocMachine(GraphMachine):
             ]
         ))
         col.append(CarouselColumn(
-            thumbnail_image_url='https://www.welcometw.com/wp-content/uploads/2020/11/%E5%90%8C%E8%A8%98%E5%AE%89%E5%B9%B3%E8%B1%86%E8%8A%B12-4-850x638.jpg',
+            thumbnail_image_url=f'{main_url}/img/2.png',
             title=title,
             text='下方選擇您的預算',
             actions=[
@@ -319,7 +321,7 @@ class TocMachine(GraphMachine):
         title = f'根據您的"{inputArea}, {inputType}, {textPrice}"需求為您提供{len(foodList)}間餐廳' if len(foodList) > 0 else f'很抱歉,我找不到資料'
         col = []
         c = CarouselColumn(
-            thumbnail_image_url='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRiEVEBZnM-1NBig3_7tuHlH9KZVn38FUoN8Nazo_ty1y4BzaqIICnU7wGr4sEFMoLZB8A&usqp=CAU',
+            thumbnail_image_url=f'{main_url}/img/3.png',
             title=title,
             text='請慢用~',
             actions=[
@@ -382,7 +384,7 @@ class TocMachine(GraphMachine):
         title = '我是主選單~'
         col = []
         col.append(CarouselColumn(
-            thumbnail_image_url='https://www.twtainan.net/Content/images/page/page-img-LocalSnacks-tablet-01.jpg',
+            thumbnail_image_url=f'{main_url}/img/4.png',
             title=title,
             text='請點選功能',
             actions=[
@@ -390,8 +392,8 @@ class TocMachine(GraphMachine):
                     label=f'我想找吃的',
                     text =f'我想找吃的' 
                 ),MessageAction(
-                    label=f'敬請期待',
-                    text =f'敬請期待'
+                    label=f'猜猜我想吃什麼',
+                    text =f'猜猜我想吃什麼'
                 ),MessageAction(
                     label=f'敬請期待',
                     text =f'敬請期待'
@@ -399,6 +401,53 @@ class TocMachine(GraphMachine):
             ]
         ))
         send_carousel_message(reply_token, col)
+
+# 1.你想要 解渴?
+# 2.你想要 熱的?
+# 3.你想要 吃肉?
+guessDict = {
+    '是': {'是' : {'是' : ['牛肉麵','藥燉排骨','蚵仔麵線','麻辣火鍋','魚湯','魚丸湯'],
+                   '否' : []},
+           '否' : {'是' : [],
+                   '否' : []}},
+    '否': {'是' : {'是' : ['滷肉飯','便當','肉圓','炸雞','鼎泰豐小籠包','鵝肉','加熱滷味','三杯雞','蚵仔煎','雞翅飯捲','超大貢丸','生煎包'],
+                   '否' : []},
+           '否' : {'是' : [],
+                   '否' : []}}
+}
+1.否 2.是 3.否
+甜不辣
+臭豆腐
+蔥抓餅
+地瓜
+擔仔麵
+筒仔米糕
+粄條
+蒸春捲
+
+1.否 2.否 3.是
+卦包
+1.否 2.否 3.否
+胡椒餅
+麻糬
+鐵蛋
+三明治
+皮蛋豆腐
+鳳梨酥
+麵包
+燒餅油條
+1.是 2.否 3.是
+猜不到
+1.是 2.否 3.否
+珍珠奶茶
+剉冰
+愛玉
+
+1.是 2.是 3.否
+甜不辣
+鼎邊銼
+豬血湯
+
     # def on_exit_state1(self):
     #     print("Leaving state1")
 

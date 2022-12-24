@@ -39,7 +39,9 @@ if channel_access_token is None:
 line_bot_api = LineBotApi(channel_access_token)
 parser = WebhookParser(channel_secret)
 
-@app.route("/", methods=["POST"])
+main_url = os.getenv("MAIN_WEB_URL",None)
+
+@app.route("/callback", methods=["POST"])
 def webhook_handler():
     signature = request.headers["X-Line-Signature"]
     # get request body as text
@@ -113,6 +115,8 @@ def webhook_handler():
         response = machine.advance(event)
         print("response : " + str(response))
         if response == False:
+            if event.message.text == 'fsm圖':
+                send_image_message(event.reply_token, f'{main_url}/show-fsm')
             if machine.state != 'user' and event.message.text=='返回主選單':
                 machine.go_back(event)
             elif machine.state == 'user':
@@ -128,10 +132,13 @@ def webhook_handler():
     return "OK"
  
 @app.route("/show-fsm", methods=["GET"])
-def show_fsm():
-    machine.get_graph().draw("fsm.png", prog="dot", format="png")
-    return send_file("fsm.png", mimetype="image/png")
-
+def show_fsm(userID):
+    machine = hash_map.get(userID)
+    machine.get_graph().draw(f"img/fsm.png", prog="dot", format="png")
+    return send_file("img/fsm.png", mimetype="image/png")
+@app.route("/img/<imageName>", methods=['GET'])
+def getImg(imageName):
+    return send_file(f"img/{imageName}", mimetype='image/png')
 
 if __name__ == "__main__":
     port = os.environ.get("PORT", 8000)
