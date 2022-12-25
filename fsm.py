@@ -646,7 +646,10 @@ class TocMachine(GraphMachine):
     def is_going_to_CombatResultLose(self, event):
         return self.combatResult == '挑戰失敗'
     def on_enter_GetTreasure(self, event):
+        msg_dict = ['你找到了寶物'] 
+
         if self.treasureFlag == False: 
+            self.treaRndMsg = random.sample(msg_dict, 1)[0]
             self.treasurelog = self.player.findTreasure()
             self.treasureFlag = True 
         text = event.message.text
@@ -656,10 +659,7 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        msg_dict = ['你找到了寶物']
-        if self.treasureFlag == False: 
-            self.treaRndMsg = random.sample(msg_dict, 1)[0]
-
+        
         player_inf = f'等級: {self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 目前生命: {self.player.nowHp} / {self.player.HP}'
         send_quick_reply(reply_token, f'{player_inf}, {self.treaRndMsg} 為你帶來增益 "{self.treasurelog}"，接下來有什麼打算呢?', buttons)
     def is_back_to_PlayMenu(self, event):
