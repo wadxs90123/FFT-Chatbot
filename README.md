@@ -1,4 +1,4 @@
-# 台南吃什麼(FoodFromTainan-Chatbot)
+# 台南吃什麼(FindFoodTainan-Chatbot)
 
 ## 前言
 因為發現生活周遭的人常常為了等一下吃什麼感到困擾，所以就藉此機會結合爬蟲做了一點簡單的小應用。
