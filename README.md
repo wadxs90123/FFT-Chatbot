@@ -181,12 +181,12 @@ user: 主選單
 ***
 ## 部屬到 Render
 
-1.註冊Render的帳號
-2.選擇Web Service
-3.把auto deploy關掉
-4.將原本打在.env檔裡面的環境變數資訊加到environment variables裡面
-5.build command那邊打pip install -r requirements.txt , run command那邊則是python app.py
-6.等它跑好，測試機器人~
+1. 註冊Render的帳號
+2. 選擇Web Service
+3. 把auto deploy關掉
+4. 將原本打在.env檔裡面的環境變數資訊加到environment variables裡面
+5. build command那邊打pip install -r requirements.txt , run command那邊則是python app.py
+6. 等它跑好，測試機器人~
 
 
 ## 相關資源 
