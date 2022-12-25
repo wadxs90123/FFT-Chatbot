@@ -188,7 +188,7 @@ def webhook_handler():
                 
     return "OK"
 import os
-os.environ['PATH'] =  os.pathsep + './Graphviz/bin/'
+# os.environ['PATH'] =  os.pathsep + './Graphviz/bin/'
 @app.route("/show-fsm/<userID>", methods=["GET"])
 def show_fsm(userID):
     machine = hash_map.get(userID)

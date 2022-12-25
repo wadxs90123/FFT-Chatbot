@@ -1,0 +1,18 @@
+services:
+- type: web
+  name: FFT-Chatbot
+  env: python
+  repo: https://github.com/wadxs90123/FFT-Chatbot.git
+  buildCommand: pip install graphviz;pip install gunicorn -r requirements.txt
+  startCommand: python app.py
+  plan: free
+  autoDeploy: false
+  envVars:
+  - key: LINE_CHANNEL_ACCESS_TOKEN
+    sync: false
+  - key: LINE_CHANNEL_SECRET
+    sync: false
+  - key: PORT
+    sync: false
+  - key: MAIN_WEB_URL
+    sync: false

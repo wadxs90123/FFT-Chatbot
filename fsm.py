@@ -609,9 +609,6 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        # s = [f'殺死怪物{log[1]}',f'地下{self.Stage-1}層:挑戰成功!',f'獲得 {log[2]} 經驗值,及 {log[3]} 金幣'] 
-        #         if '你升級了' in log:
-        #             s.append('你升級了')
         log = f'{self.combatResult[2]}'
         if self.combatResult[-1] =='你升級了':
             log+=f',恭喜升級,目前等級為 {self.player.LV}'
@@ -788,14 +785,3 @@ class TocMachine(GraphMachine):
         send_carousel_message(reply_token, col)
     def response_false(self, event):
         return True
-# 1.你想要 解渴?
-# 2.你想要 熱的?
-# 3.你想要 吃肉?
- 
- 
-
-    # def on_exit_state1(self):
-    #     print("Leaving state1")
-
-    # def on_exit_state2(self):
-    #     print("Leaving state2")
