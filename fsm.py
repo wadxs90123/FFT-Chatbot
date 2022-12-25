@@ -26,9 +26,11 @@ class Mob:
         name = ['史萊姆','殭屍','骷髏']
         self.HP = math.floor(stage*2+stage+1+random.randint(0,stage*10))
         self.name = random.sample(name,1)[0]
+        self.LV = random.randint(stage-1,stage+3)
         self.Damage = math.floor(5 + random.randint(0, stage*10))
         self.Armor = math.floor(5 + random.randint(0, stage*10))
         self.exp = math.floor(2+random.randint(0,stage*15))
+        self.coins = math.floor(2+random.randint(0,stage*20))
 class player:
     def __init__(self) -> None:
         self.HP = 15
@@ -49,7 +51,10 @@ class player:
         if (self.mob is not None) and self.mob.HP <= 0:
             res.append(msg[2])
             res.append(self.mob.name)
+            res.append(self.mob.exp)
+            res.append(self.mob.coins)
             self.EXP += self.mob.exp
+            self.coin += self.mob.coins
             self.Stage+=1
             self.mob = None
         if self.EXP >= self.lvUpEXP:
@@ -78,16 +83,20 @@ class player:
         self.mob = Mob(self.Stage)
     def damageToMob(self):
         totaldamage = self.Damage - self.mob.Armor
+        if totaldamage <= 0:
+            totaldamage = 1
         self.mob.HP-=totaldamage
     def damageFromMob(self):
         totaldamage = self.mob.Damage - self.Armor
+        if(totaldamage <= 0):
+            totaldamage =1
         self.nowHp -= totaldamage
     def combat(self):
         while True:
             self.damageToMob()
             log = self.update()
             if '你殺死怪物' in log:
-                s = [f'殺死怪物{log[1]}',f'地下{self.Stage-1}層:挑戰成功!'] 
+                s = [f'殺死怪物{log[1]}',f'地下{self.Stage-1}層:挑戰成功!',f'獲得 {log[2]} 經驗值,及 {log[3]} 金幣'] 
                 if '你升級了' in log:
                     s.append('你升級了')
                 return s
@@ -508,15 +517,15 @@ class TocMachine(GraphMachine):
     def is_going_to_GetTreasure(self, event):
         text = event.message.text
         reply_token = event.reply_token
-        return text != '返回地下城選單' and self.Dice == 2
+        return text == '向前探查' and self.Dice == 2
     def is_going_to_Nothing(self, event):
         text = event.message.text
         reply_token = event.reply_token
-        return text != '返回地下城選單' and self.Dice == 0
+        return text == '向前探查' and self.Dice == 0
     def is_going_to_MeetMob(self, event):
         text = event.message.text
         reply_token = event.reply_token
-        return text != '返回地下城選單' and self.Dice == 1
+        return text == '向前探查' and self.Dice == 1
     def on_enter_PlayerStatus(self, event):
         text = event.message.text
         reply_token = event.reply_token
@@ -525,7 +534,7 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回地下城選單", text="返回地下城選單")
             ),
         ]
-        send_quick_reply(reply_token, f"能力值: 等級:{self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 生命:{self.player.nowHp}/{self.player.HP} 傷害:{self.player.Damage} 防禦:{self.player.Armor}", buttons)
+        send_quick_reply(reply_token, f"能力值: 等級:{self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 生命:{self.player.nowHp}/{self.player.HP} 傷害:{self.player.Damage} 防禦:{self.player.Armor} 金錢:{self.player.coin} 層數:{self.player.Stage}", buttons)
     def on_enter_PlayMenu(self, event):
         text = event.message.text
         reply_token = event.reply_token 
@@ -542,6 +551,10 @@ class TocMachine(GraphMachine):
         ]
         send_quick_reply(reply_token, f"您好，接下來有什麼打算呢?", buttons)
     def on_enter_Advanture(self, event):
+        self.treasureFlag = False
+        self.NothingFlag = False
+        self.combatFlag = False
+        self.meetFlag = False
         text = event.message.text
         reply_token = event.reply_token 
         self.Dice = random.randint(0,2)
@@ -564,9 +577,18 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        send_quick_reply(reply_token, f"你走進一個房間，發現空無一物，接下來有什麼打算呢?", buttons)
+        msg_dict = ['你走進一個房間，發現空無一物']
+    
+        if self.NothingFlag == False:
+            self.NothingFlag = True 
+            self.NothingRndMsg = random.sample(msg_dict, 1)[0]
+
+        player_inf = f'等級: {self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 目前生命: {self.player.nowHp} / {self.player.HP}'
+        send_quick_reply(reply_token, f"{player_inf}, {self.NothingRndMsg}，接下來有什麼打算呢?", buttons)
     def on_enter_MeetMob(self, event):
-        self.player.meetMob()
+        if self.meetFlag == False:
+            self.meetFlag = True
+            self.player.meetMob()
         text = event.message.text
         reply_token = event.reply_token 
         buttons = [
@@ -577,7 +599,8 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        send_quick_reply(reply_token, f"你遭遇到了怪物 {self.player.mob.name}，接下來有什麼打算呢?", buttons)
+        player_inf = f'等級: {self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 目前生命: {self.player.nowHp} / {self.player.HP}'
+        send_quick_reply(reply_token, f"{player_inf}, 你遭遇到了怪物 {self.player.mob.name}(Lv.{self.player.mob.LV})(怪物資訊 生命:{self.player.mob.HP} 傷害:{self.player.mob.Damage}, 防禦:{self.player.mob.Armor})，接下來有什麼打算呢?", buttons)
     def on_enter_CombatResultWin(self, event):
         text = event.message.text
         reply_token = event.reply_token 
@@ -586,7 +609,13 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        send_quick_reply(reply_token, f"你打贏了，接下來有什麼打算呢?", buttons)
+        # s = [f'殺死怪物{log[1]}',f'地下{self.Stage-1}層:挑戰成功!',f'獲得 {log[2]} 經驗值,及 {log[3]} 金幣'] 
+        #         if '你升級了' in log:
+        #             s.append('你升級了')
+        log = f'{self.combatResult[2]}'
+        if self.combatResult[-1] =='你升級了':
+            log+=f',恭喜升級,目前等級為 {self.player.LV}'
+        send_quick_reply(reply_token, f"你打贏了,{log},接下來有什麼打算呢?", buttons)
     def on_enter_CombatResultLose(self, event):
         text = event.message.text
         reply_token = event.reply_token 
@@ -597,7 +626,9 @@ class TocMachine(GraphMachine):
         ]
         send_quick_reply(reply_token, f"你死了.", buttons)
     def on_enter_Combating(self, event):
-        self.combatResult = self.player.combat()
+        if self.combatFlag == False:
+            self.combatFlag = True
+            self.combatResult = self.player.combat()
         text = event.message.text
         reply_token = event.reply_token 
         buttons = [
@@ -615,7 +646,9 @@ class TocMachine(GraphMachine):
     def is_going_to_CombatResultLose(self, event):
         return self.combatResult == '挑戰失敗'
     def on_enter_GetTreasure(self, event):
-        a = self.player.findTreasure()
+        if self.treasureFlag == False: 
+            self.treasurelog = self.player.findTreasure()
+            self.treasureFlag = True 
         text = event.message.text
         reply_token = event.reply_token 
         buttons = [
@@ -623,7 +656,12 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主路線", text="返回主路線")
             ),
         ]
-        send_quick_reply(reply_token, f'你找到了寶物 為你帶來增益 "{a}"，接下來有什麼打算呢?', buttons)
+        msg_dict = ['你找到了寶物']
+        if self.treasureFlag == False: 
+            self.treaRndMsg = random.sample(msg_dict, 1)[0]
+
+        player_inf = f'等級: {self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 目前生命: {self.player.nowHp} / {self.player.HP}'
+        send_quick_reply(reply_token, f'{player_inf}, {self.treaRndMsg} 為你帶來增益 "{self.treasurelog}"，接下來有什麼打算呢?', buttons)
     def is_back_to_PlayMenu(self, event):
         text = event.message.text
         reply_token = event.reply_token

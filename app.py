@@ -179,7 +179,7 @@ def webhook_handler():
         response = machine.advance(event)
         print("response : " + str(response))
         if response == False:
-            if event.message.text.lower() == 'fsm':
+            if event.message.text.lower().strip() == 'fsm':
                 send_image_message(event.reply_token, f'{main_url}/show-fsm/{userId}')
             elif machine.state != 'user' and event.message.text=='返回主選單':
                 machine.go_back(event)
