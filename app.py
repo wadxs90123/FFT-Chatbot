@@ -192,8 +192,8 @@ os.environ['PATH'] =  os.pathsep + './Graphviz/bin/'
 @app.route("/show-fsm/<userID>", methods=["GET"])
 def show_fsm(userID):
     machine = hash_map.get(userID)
-    machine.get_graph().draw(f"img/{userID}.png", prog="dot", format="png")
-    return send_file(f"img/{userID}.png", mimetype="image/png")
+    # machine.get_graph().draw(f"img/{userID}.png", prog="dot", format="png")
+    return send_file(f"img/fsm.png", mimetype="image/png")
 @app.route("/img/<imageName>", methods=['GET'])
 def getImg(imageName):
     return send_file(f"img/{imageName}", mimetype='image/png')

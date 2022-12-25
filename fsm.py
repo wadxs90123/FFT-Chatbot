@@ -549,7 +549,7 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回主選單", text="返回主選單")
             ),
         ]
-        send_quick_reply(reply_token, f"您好，接下來有什麼打算呢?", buttons)
+        send_quick_reply(reply_token, f"接下來有什麼打算呢?", buttons)
     def on_enter_Advanture(self, event):
         self.treasureFlag = False
         self.NothingFlag = False
@@ -566,7 +566,7 @@ class TocMachine(GraphMachine):
                 action=MessageAction(label="返回地下城選單", text="返回地下城選單")
             ),
         ]
-        send_quick_reply(reply_token, f"您好，接下來有什麼打算呢?(層數: 地下 {self.player.Stage} 層)", buttons)
+        send_quick_reply(reply_token, f"接下來有什麼打算呢?(層數: 地下 {self.player.Stage} 層)", buttons)
     def on_enter_Nothing(self, event):
         text = event.message.text
         reply_token = event.reply_token
