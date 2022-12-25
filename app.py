@@ -82,6 +82,8 @@ def webhook_handler():
             transitions=[
                     {"trigger": "advance", "source": "user", "dest": "inputArea",      "conditions": "is_going_to_inputArea"},
                     {"trigger": "advance", "source": "inputArea", "dest": "inputType", "conditions": "is_going_to_inputType"},
+                    {"trigger": "advance", "source": "inputArea2", "dest": "inputType", "conditions": "is_going_to_inputType"},
+                    {"trigger": "advance", "source": "inputArea3", "dest": "inputType", "conditions": "is_going_to_inputType"},
                     
                     {"trigger": "advance", "source": "inputArea", "dest": "inputArea2", "conditions": "is_going_to_inputArea2"},
                     {"trigger": "advance", "source": "inputArea2", "dest": "inputArea", "conditions": "inputArea2_going_to_inputArea"},
