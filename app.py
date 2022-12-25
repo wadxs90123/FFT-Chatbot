@@ -9,7 +9,6 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import PostbackAction,URIAction,CarouselColumn,MessageEvent,MessageAction, TextMessage, TextSendMessage
 
 from fsm import TocMachine
-from fsm import inputArea, inputType, inputPrice
 from spider import ScratchPages
 from spider import Store
 from utils import send_text_message
@@ -63,7 +62,22 @@ def webhook_handler():
                     "inputArea3",
                     "inputType",
                     "inputPrice",
-                    "startSearch"
+                    "startSearch",
+                    
+                    "GuessStart",
+                    "Guess2",
+                    "Guess3",
+                    "GuessResult",
+
+                    "PlayerStatus",
+                    "PlayMenu",
+                    "Advanture",
+                    "Nothing",
+                    "MeetMob",
+                    "Combating",
+                    "CombatResultWin",
+                    "CombatResultLose",
+                    "GetTreasure",
             ],
             transitions=[
                     {"trigger": "advance", "source": "user", "dest": "inputArea",      "conditions": "is_going_to_inputArea"},
@@ -81,8 +95,58 @@ def webhook_handler():
                     {"trigger": "advance", "source": "inputPrice", "dest": "startSearch", "conditions": "is_going_to_startSearch"},
                     {"trigger": "advance", "source": "startSearch", "dest": "startSearch", "conditions": "want_more"},
                     {"trigger": "advance", "source": "startSearch", "dest": "inputPrice", "conditions": "go_back_to_price"},
-                    # {"trigger": "advance", "source": "startSearch", "dest": "user", "condition":"is_going_to_user_from_startSearch"},
-                    {"trigger": "go_back", "source": ["inputPrice","inputType","inputArea","inputArea2","inputArea3","startSearch"], "dest": "user","conditions":"is_back_to_user"},
+
+                    {"trigger": "advance", "source": "user", "dest": "GuessStart", "conditions": "is_going_to_GuessStart"},
+                    {"trigger": "advance", "source": "GuessStart", "dest": "Guess2", "conditions": "is_going_to_Guess2"},
+                    {"trigger": "advance", "source": "Guess2", "dest": "Guess3", "conditions": "is_going_to_Guess3"},
+                    {"trigger": "advance", "source": "Guess3", "dest": "GuessResult", "conditions": "is_going_to_GuessResult"},
+                    
+                    {"trigger": "advance", "source": "Guess2", "dest": "GuessStart", "conditions": "is_back_to_GuessStart"},
+                    {"trigger": "advance", "source": "Guess3", "dest": "Guess2", "conditions": "is_back_to_Guess2"},
+                    {"trigger": "advance", "source": "GuessResult", "dest": "Guess3", "conditions": "is_back_to_Guess3"},
+                    
+                      
+                    {"trigger": "advance", "source": "user", "dest": "PlayMenu", "conditions": "is_going_to_PlayMenu"},
+                    {"trigger": "advance", "source": "PlayMenu", "dest": "PlayerStatus", "conditions": "is_going_to_PlayerStatus"},
+                    {"trigger": "advance", "source": "PlayMenu", "dest": "Advanture", "conditions": "is_going_to_Advanture"},
+                    {"trigger": "advance", "source": "Advanture", "dest": "GetTreasure", "conditions": "is_going_to_GetTreasure"},
+                    
+                    {"trigger": "advance", "source": "MeetMob", "dest": "Combating", "conditions": "is_going_to_Combating"},
+                    {"trigger": "advance", "source": "Combating", "dest": "CombatResultWin", "conditions": "is_going_to_CombatResultWin"},
+                    {"trigger": "advance", "source": "Combating", "dest": "CombatResultLose", "conditions": "is_going_to_CombatResultLose"},
+                    {"trigger": "advance", "source": "Advanture", "dest": "Nothing", "conditions": "is_going_to_Nothing"},
+                    {"trigger": "advance", "source": "Advanture", "dest": "MeetMob", "conditions": "is_going_to_MeetMob"},
+                    
+                    {"trigger": "advance", "source": "Advanture", "dest": "PlayMenu", "conditions": "is_back_to_PlayMenu"},
+                    {"trigger": "advance", "source": "GetTreasure", "dest": "Advanture", "conditions": "is_back_to_Advanture"},
+                    {"trigger": "advance", "source": "Nothing", "dest": "Advanture", "conditions": "is_back_to_Advanture"},
+                    {"trigger": "advance", "source": "MeetMob", "dest": "Advanture", "conditions": "is_back_to_Advanture"},
+                    {"trigger": "advance", "source": "PlayerStatus", "dest": "PlayMenu", "conditions": "is_back_to_PlayMenu"},
+                    {"trigger": "advance", "source": "CombatResultWin", "dest": "Advanture", "conditions": "is_back_to_Advanture"},
+                    {"trigger": "advance", "source": "CombatResultLose", "dest": "PlayMenu", "conditions": "is_back_to_PlayMenu"},
+
+
+                    {"trigger": "self_back","source": "GuessStart", "dest":"GuessStart", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "inputArea", "dest":"inputArea", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "inputArea2", "dest":"inputArea2", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "inputArea3", "dest":"inputArea3", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "inputType", "dest":"inputType", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "inputPrice", "dest":"inputPrice", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "startSearch", "dest":"startSearch", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "GuessStart", "dest":"GuessStart", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "Guess2", "dest":"Guess2", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "Guess3", "dest":"Guess3", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "GuessResult", "dest":"GuessResult", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "user", "dest":"user", "conditions":"response_false"},
+                    
+                    {"trigger": "self_back","source": "PlayerStatus", "dest":"PlayerStatus", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "PlayMenu", "dest":"PlayMenu", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "Advanture", "dest":"Advanture", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "Nothing", "dest":"Nothing", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "MeetMob", "dest":"MeetMob", "conditions":"response_false"},
+                    {"trigger": "self_back","source": "GetTreasure", "dest":"GetTreasure", "conditions":"response_false"},
+
+                    {"trigger": "go_back", "source": ["PlayMenu","GuessStart","Guess2","Guess3","GuessResult","inputPrice","inputType","inputArea","inputArea2","inputArea3","startSearch"], "dest": "user","conditions":"is_back_to_user"},
             ],
             initial="user",
             auto_transitions=False,
@@ -115,27 +179,21 @@ def webhook_handler():
         response = machine.advance(event)
         print("response : " + str(response))
         if response == False:
-            if event.message.text == 'fsm圖':
-                send_image_message(event.reply_token, f'{main_url}/show-fsm')
-            if machine.state != 'user' and event.message.text=='返回主選單':
+            if event.message.text.lower() == 'fsm':
+                send_image_message(event.reply_token, f'{main_url}/show-fsm/{userId}')
+            elif machine.state != 'user' and event.message.text=='返回主選單':
                 machine.go_back(event)
-            elif machine.state == 'user':
-                # send_text_message(reply_token, "請輸入\"start\"來開始查找食物")
-                machine.on_enter_user(event)
-            elif machine.state == 'inputArea':
-                machine.on_enter_inputArea(event)
-            elif machine.state == 'inputType':
-                machine.on_enter_inputType(event)
-            elif machine.state == 'inputPrice':
-                machine.on_enter_inputPrice(event)
+            else:
+                machine.self_back(event)
                 
     return "OK"
- 
-@app.route("/show-fsm", methods=["GET"])
+import os
+os.environ['PATH'] =  os.pathsep + './Graphviz/bin/'
+@app.route("/show-fsm/<userID>", methods=["GET"])
 def show_fsm(userID):
     machine = hash_map.get(userID)
-    machine.get_graph().draw(f"img/fsm.png", prog="dot", format="png")
-    return send_file("img/fsm.png", mimetype="image/png")
+    machine.get_graph().draw(f"img/{userID}.png", prog="dot", format="png")
+    return send_file(f"img/{userID}.png", mimetype="image/png")
 @app.route("/img/<imageName>", methods=['GET'])
 def getImg(imageName):
     return send_file(f"img/{imageName}", mimetype='image/png')

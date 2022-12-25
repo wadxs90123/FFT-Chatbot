@@ -1,7 +1,7 @@
 import os
 
 from linebot import LineBotApi, WebhookParser
-from linebot.models import VideoSendMessage,MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ImageCarouselColumn,CarouselTemplate, ImageCarouselTemplate, URITemplateAction, ButtonsTemplate, MessageTemplateAction, ImageSendMessage
+from linebot.models import MessageAction,QuickReplyButton,QuickReply,VideoSendMessage,MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ImageCarouselColumn,CarouselTemplate, ImageCarouselTemplate, URITemplateAction, ButtonsTemplate, MessageTemplateAction, ImageSendMessage
 from linebot.models import ImageCarouselColumn, URITemplateAction, MessageTemplateAction
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
@@ -26,6 +26,19 @@ def send_video_message(reply_token, videoUrl, preUrl):
     line_bot_api.reply_message(reply_token, message)
     return "OK"
 
+def send_quick_reply(reply_token, text_, items_):
+    line_bot_api = LineBotApi(channel_access_token)
+    line_bot_api.reply_message(
+        reply_token,
+        TextSendMessage(
+            text = text_,
+            quick_reply=QuickReply(
+                items=items_
+            )
+        )
+    )
+    return "OK"
+                
 def send_carousel_message(reply_token, col):
     line_bot_api = LineBotApi(channel_access_token)
     message = TemplateSendMessage(

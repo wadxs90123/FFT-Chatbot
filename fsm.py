@@ -6,7 +6,7 @@ import re
 from spider import ScratchPages
 from spider import Store
 from linebot import LineBotApi, WebhookParser
-from linebot.models import MessageAction,MessageEvent, TextMessage, TextSendMessage, VideoSendMessage
+from linebot.models import QuickReplyButton,MessageAction,MessageEvent, TextMessage, TextSendMessage, VideoSendMessage
 from linebot.models import PostbackAction,URIAction, CarouselColumn,ImageCarouselColumn, URITemplateAction, MessageTemplateAction
 from utils import send_text_message 
 from utils import send_carousel_message
@@ -14,27 +14,116 @@ from utils import send_button_message
 from utils import send_image_message
 from utils import send_video_message
 from utils import send_text_multiple_message
+from utils import send_quick_reply
 from bs4 import BeautifulSoup
 
 import os
 main_url = os.getenv("MAIN_WEB_URL",None)
+import math
 
-# searchWeb = 'list?priceLevel=2'
-# mainWeb = 'https://ifoodie.tw/explore/%E5%8F%B0%E5%8D%97%E5%B8%82/%E5%AE%89%E5%8D%97%E5%8D%80/list?priceLevel=2'
-# searchWeb = '{mainWeb}/XX區/list/xx餐{?priceLevel=消費模式}'
+class Mob:
+    def __init__(self, stage) -> None:
+        name = ['史萊姆','殭屍','骷髏']
+        self.HP = math.floor(stage*2+stage+1+random.randint(0,stage*10))
+        self.name = random.sample(name,1)[0]
+        self.Damage = math.floor(5 + random.randint(0, stage*10))
+        self.Armor = math.floor(5 + random.randint(0, stage*10))
+        self.exp = math.floor(2+random.randint(0,stage*15))
+class player:
+    def __init__(self) -> None:
+        self.HP = 15
+        self.nowHp = 15
+        self.EXP = 0
+        self.Damage = 5
+        self.Armor = 5
+        self.LV = 1
+        self.Stage = 1
+        self.coin = 0
+        self.mob = None
+        self.lvUpEXP = self.LV**2+self.LV*3+1
+    def levelUpCal(self):
+        return self.LV**2+self.LV*3+1
+    def update(self):
+        msg = ['你死了', '你升級了','你殺死怪物']
+        res = []
+        if (self.mob is not None) and self.mob.HP <= 0:
+            res.append(msg[2])
+            res.append(self.mob.name)
+            self.EXP += self.mob.exp
+            self.Stage+=1
+            self.mob = None
+        if self.EXP >= self.lvUpEXP:
+            self.LV+=1
+            self.EXP-=self.lvUpEXP
+            self.lvUpEXP = self.levelUpCal()
+            self.HP += 2
+            self.nowHp = self.HP   
+            self.Damage += 2
+            self.Armor += 2
+            res.append(msg[1])
+        if self.nowHp <= 0:
+            self.nowHp = self.HP
+            res.append(msg[0]) 
+        return res 
+    def findTreasure(self):
+        hp = random.randint(0, 10*(self.Stage))        
+        self.HP += hp
+        dp = random.randint(0, 10*(self.Stage))
+        self.Damage += dp
+        
+        ar = random.randint(0, 10*(self.Stage))        
+        self.Armor += ar
+        return f'生命 +{hp} 傷害 +{dp} 防禦 +{ar}'
+    def meetMob(self):
+        self.mob = Mob(self.Stage)
+    def damageToMob(self):
+        totaldamage = self.Damage - self.mob.Armor
+        self.mob.HP-=totaldamage
+    def damageFromMob(self):
+        totaldamage = self.mob.Damage - self.Armor
+        self.nowHp -= totaldamage
+    def combat(self):
+        while True:
+            self.damageToMob()
+            log = self.update()
+            if '你殺死怪物' in log:
+                s = [f'殺死怪物{log[1]}',f'地下{self.Stage-1}層:挑戰成功!'] 
+                if '你升級了' in log:
+                    s.append('你升級了')
+                return s
+            self.damageFromMob()
+            log = self.update()
+            if '你死了' in log:
+                return '挑戰失敗'
+            
 searchWeb = 'https://ifoodie.tw/explore/台南市'
+guessDict = {
+    '是': {'是' : {'是' : ['牛肉麵','藥燉排骨','蚵仔麵線','麻辣火鍋','魚湯','魚丸湯'],
+                   '否' : ['甜不辣','鼎邊銼','豬血湯']},
+           '否' : {'是' : ['抱歉，你的心思難以捉摸，我無法提供您滿意的回答'],
+                   '否' : ['珍珠奶茶','剉冰','愛玉']}},
+    '否': {'是' : {'是' : ['滷肉飯','便當','肉圓','炸雞','鼎泰豐小籠包','鵝肉','加熱滷味','三杯雞','蚵仔煎','雞翅飯捲','超大貢丸','生煎包'],
+                   '否' : ['甜不辣','臭豆腐','蔥抓餅','地瓜','擔仔麵','筒仔米糕','粄條','蒸春捲']},
+           '否' : {'是' : ['卦包'],
+                   '否' : ['胡椒餅','麻糬','鐵蛋','三明治','皮蛋豆腐','鳳梨酥','麵包','燒餅油條']}}
+}
 inputAreaGreetingDict = ['好的, 您想在哪區吃呢?']
 inputAreaDict = ['新營區','鹽水區','白河區','柳營區','後壁區','東山區','麻豆區','下營區','六甲區','官田區'
                 ,'大內區','佳里區','學甲區','西港區','七股區','將軍區','北門區','新化區','新市區','善化區'
                 ,'安定區','山上區','玉井區','楠西區','南化區','左鎮區','仁德區','歸仁區','關廟區','龍崎區'
                 ,'永康區','東區','南區','中西區','北區','安南區','安平區']
 inputTypeDict = ['早餐', '午餐', '晚餐', '宵夜']
-inputArea = ""
-inputType = ""
-inputPrice = ""
+
 class TocMachine(GraphMachine):
     
     def __init__(self, **machine_configs):
+        self.player = player()
+        self.inputArea = ''
+        self.inputType = ''
+        self.inputPrice = ''
+        self.firstGuess = ''
+        self.SecondGuess = ''
+        self.ThirdGuess = ''
         self.machine = GraphMachine(model=self, **machine_configs)
     def is_going_to_inputArea(self, event):
         reply_token = event.reply_token
@@ -377,9 +466,12 @@ class TocMachine(GraphMachine):
         text = event.message.text
         reply_token = event.reply_token
         global inputArea,inputType,inputPrice
-        inputArea = ""
-        inputType = ""
-        inputPrice = ""
+        self.inputArea = ''
+        self.inputType = ''
+        self.inputPrice = ''
+        self.firstGuess = ''
+        self.SecondGuess = ''
+        self.ThirdGuess = ''
         reply_token = event.reply_token
         title = '我是主選單~'
         col = []
@@ -395,58 +487,274 @@ class TocMachine(GraphMachine):
                     label=f'猜猜我想吃什麼',
                     text =f'猜猜我想吃什麼'
                 ),MessageAction(
-                    label=f'敬請期待',
-                    text =f'敬請期待'
+                    label=f'地下城小遊戲',
+                    text =f'地下城小遊戲'
                 )
             ]
         ))
         send_carousel_message(reply_token, col)
+    def is_going_to_PlayMenu(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == '地下城小遊戲'
+    def is_going_to_PlayerStatus(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == '查看角色資訊'
+    def is_going_to_Advanture(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == '進入地下城'
+    def is_going_to_GetTreasure(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text != '返回地下城選單' and self.Dice == 2
+    def is_going_to_Nothing(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text != '返回地下城選單' and self.Dice == 0
+    def is_going_to_MeetMob(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text != '返回地下城選單' and self.Dice == 1
+    def on_enter_PlayerStatus(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="返回地下城選單", text="返回地下城選單")
+            ),
+        ]
+        send_quick_reply(reply_token, f"能力值: 等級:{self.player.LV}({self.player.EXP}/{self.player.lvUpEXP}) 生命:{self.player.nowHp}/{self.player.HP} 傷害:{self.player.Damage} 防禦:{self.player.Armor}", buttons)
+    def on_enter_PlayMenu(self, event):
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="進入地下城", text="進入地下城")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="查看角色資訊", text="查看角色資訊")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="返回主選單", text="返回主選單")
+            ),
+        ]
+        send_quick_reply(reply_token, f"您好，接下來有什麼打算呢?", buttons)
+    def on_enter_Advanture(self, event):
+        text = event.message.text
+        reply_token = event.reply_token 
+        self.Dice = random.randint(0,2)
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="向前探查", text="向前探查")
+            ), 
+            QuickReplyButton(
+                action=MessageAction(label="返回地下城選單", text="返回地下城選單")
+            ),
+        ]
+        send_quick_reply(reply_token, f"您好，接下來有什麼打算呢?(層數: 地下 {self.player.Stage} 層)", buttons)
+    def on_enter_Nothing(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="返回主路線", text="返回主路線")
+            ),
+        ]
+        send_quick_reply(reply_token, f"你走進一個房間，發現空無一物，接下來有什麼打算呢?", buttons)
+    def on_enter_MeetMob(self, event):
+        self.player.meetMob()
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="跟他打", text="跟他打")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="返回主路線", text="返回主路線")
+            ),
+        ]
+        send_quick_reply(reply_token, f"你遭遇到了怪物 {self.player.mob.name}，接下來有什麼打算呢?", buttons)
+    def on_enter_CombatResultWin(self, event):
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="返回主路線", text="返回主路線")
+            ),
+        ]
+        send_quick_reply(reply_token, f"你打贏了，接下來有什麼打算呢?", buttons)
+    def on_enter_CombatResultLose(self, event):
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="返回地下城選單", text="返回地下城選單")
+            ),
+        ]
+        send_quick_reply(reply_token, f"你死了.", buttons)
+    def on_enter_Combating(self, event):
+        self.combatResult = self.player.combat()
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="查看結果", text="查看結果")
+            ),
+        ]
+        send_quick_reply(reply_token, f"你選擇戰鬥,結果如何呢...", buttons)
+    def is_going_to_Combating(self, event):
+        text = event.message.text
+        return text == '跟他打'
+    def is_going_to_CombatResultWin(self, event):
+        text = event.message.text
+        return self.combatResult != '挑戰失敗'
+    def is_going_to_CombatResultLose(self, event):
+        return self.combatResult == '挑戰失敗'
+    def on_enter_GetTreasure(self, event):
+        a = self.player.findTreasure()
+        text = event.message.text
+        reply_token = event.reply_token 
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="返回主路線", text="返回主路線")
+            ),
+        ]
+        send_quick_reply(reply_token, f'你找到了寶物 為你帶來增益 "{a}"，接下來有什麼打算呢?', buttons)
+    def is_back_to_PlayMenu(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == '返回地下城選單'
+    def is_back_to_Advanture(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == '返回主路線'
 
+
+    def is_going_to_GuessStart(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == "猜猜我想吃什麼"
+    def is_going_to_Guess2(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        a = ['是','否']
+        if text in a:
+            self.firstGuess = text
+            return True 
+        return False
+    def is_going_to_Guess3(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        a = ['是','否']
+        if text in a:
+            self.SecondGuess = text
+            return True 
+        return False
+    def is_going_to_GuessResult(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        a = ['是','否']
+        if text in a:
+            self.ThirdGuess = text
+            return True 
+        return False
+    def on_enter_GuessStart(self, event):
+        text = event.message.text
+        reply_token = event.reply_token  
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="是", text="是")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="否", text="否")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="返回主選單", text="返回主選單")
+            ),
+        ]
+        send_quick_reply(reply_token, "你覺得渴嗎?", buttons)
+    def is_back_to_GuessStart(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == "回上一步"
+    def is_back_to_Guess2(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == "回上一步"
+    def is_back_to_Guess3(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        return text == "回上一步"
+    def on_enter_Guess2(self, event):
+        text = event.message.text
+        reply_token = event.reply_token  
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="是", text="是")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="否", text="否")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="回上一步", text="回上一步")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="返回主選單", text="返回主選單")
+            ),
+        ]
+        send_quick_reply(reply_token, "你想吃熱的嗎?", buttons)
+    def on_enter_Guess3(self, event):
+        text = event.message.text
+        reply_token = event.reply_token  
+        buttons = [
+            QuickReplyButton(
+                action=MessageAction(label="是", text="是")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="否", text="否")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="回上一步", text="回上一步")
+            ),
+            QuickReplyButton(
+                action=MessageAction(label="返回主選單", text="返回主選單")
+            ),
+        ]
+        send_quick_reply(reply_token, "你想吃肉嗎?", buttons)
+    def on_enter_GuessResult(self, event):
+        text = event.message.text
+        reply_token = event.reply_token
+        print(self.firstGuess, self.SecondGuess, self.ThirdGuess)
+        resList = guessDict[self.firstGuess][self.SecondGuess][self.ThirdGuess]
+        a = random.sample(resList,1)
+        title = '結果'
+        col = []
+        col.append(CarouselColumn(
+            thumbnail_image_url=f'{main_url}/img/4.png',
+            title=title,
+            text=f'{a[0]}',
+            actions=[
+                MessageAction(
+                    label=f'回上一步',
+                    text =f'回上一步'
+                ),MessageAction(
+                    label=f'返回主選單',
+                    text =f'返回主選單'
+                )
+            ]
+        ))
+        send_carousel_message(reply_token, col)
+    def response_false(self, event):
+        return True
 # 1.你想要 解渴?
 # 2.你想要 熱的?
 # 3.你想要 吃肉?
-guessDict = {
-    '是': {'是' : {'是' : ['牛肉麵','藥燉排骨','蚵仔麵線','麻辣火鍋','魚湯','魚丸湯'],
-                   '否' : []},
-           '否' : {'是' : [],
-                   '否' : []}},
-    '否': {'是' : {'是' : ['滷肉飯','便當','肉圓','炸雞','鼎泰豐小籠包','鵝肉','加熱滷味','三杯雞','蚵仔煎','雞翅飯捲','超大貢丸','生煎包'],
-                   '否' : []},
-           '否' : {'是' : [],
-                   '否' : []}}
-}
-1.否 2.是 3.否
-甜不辣
-臭豆腐
-蔥抓餅
-地瓜
-擔仔麵
-筒仔米糕
-粄條
-蒸春捲
-
-1.否 2.否 3.是
-卦包
-1.否 2.否 3.否
-胡椒餅
-麻糬
-鐵蛋
-三明治
-皮蛋豆腐
-鳳梨酥
-麵包
-燒餅油條
-1.是 2.否 3.是
-猜不到
-1.是 2.否 3.否
-珍珠奶茶
-剉冰
-愛玉
-
-1.是 2.是 3.否
-甜不辣
-鼎邊銼
-豬血湯
+ 
+ 
 
     # def on_exit_state1(self):
     #     print("Leaving state1")
