@@ -199,5 +199,11 @@ def getImg(imageName):
     return send_file(f"img/{imageName}", mimetype='image/png')
 
 if __name__ == "__main__":
+    from gevent import pywsgi  
     port = os.environ.get("PORT", 8000)
-    app.run(host="0.0.0.0", port=port, debug=True)
+
+    server = pywsgi.WSGIServer(('0.0.0.0',int(port)),app)
+ 
+    server.serve_forever()
+    # port = os.environ.get("PORT", 8000)
+    # app.run(host="0.0.0.0", port=port, debug=True)

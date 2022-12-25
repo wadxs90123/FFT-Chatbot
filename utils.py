@@ -1,8 +1,11 @@
 import os
+from dotenv import load_dotenv
 
 from linebot import LineBotApi, WebhookParser
 from linebot.models import MessageAction,QuickReplyButton,QuickReply,VideoSendMessage,MessageEvent, TextMessage, TextSendMessage, TemplateSendMessage, ImageCarouselColumn,CarouselTemplate, ImageCarouselTemplate, URITemplateAction, ButtonsTemplate, MessageTemplateAction, ImageSendMessage
 from linebot.models import ImageCarouselColumn, URITemplateAction, MessageTemplateAction
+
+load_dotenv()
 
 channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 

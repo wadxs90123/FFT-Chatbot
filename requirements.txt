@@ -1,5 +1,6 @@
 beautifulsoup4==4.11.1
 Flask==2.2.2
+gevent==22.10.2
 line_bot_sdk==2.3.0
 python-dotenv==0.21.0
 requests==2.26.0
